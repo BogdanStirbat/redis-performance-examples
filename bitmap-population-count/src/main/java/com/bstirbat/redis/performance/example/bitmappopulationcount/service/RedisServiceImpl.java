@@ -3,6 +3,7 @@ package com.bstirbat.redis.performance.example.bitmappopulationcount.service;
 import com.bstirbat.redis.performance.example.bitmappopulationcount.model.ExperimentParameters;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
 
 import java.util.Random;
 
@@ -25,10 +26,14 @@ public class RedisServiceImpl implements RedisService {
 
         Random random = new Random();
 
+        Pipeline pipeline = jedis.pipelined();
+
         for (long i = 0; i < experimentParameters.getPopulationNumber(); i++) {
             boolean value = random.nextInt(experimentParameters.getMaxRandom()) < experimentParameters.getLessThan();
-            jedis.setbit(experimentParameters.getKey(), i, value);
+            pipeline.setbit(experimentParameters.getKey(), i, value);
         }
+
+        pipeline.sync();
     }
 
     @Override
